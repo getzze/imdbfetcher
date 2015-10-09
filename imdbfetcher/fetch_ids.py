@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import time
 from .services import providers
 
 logger = logging.getLogger(__name__)
@@ -19,16 +20,19 @@ def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrap
     # results are stored in a list
     results = []
     if use_tmdbsimple:
-        query = providers['movie']['tmdb']
-        results.extend(query(title, year))
+        query = providers['movie'].get('tmdb')
+        if query:
+            results.extend(query(title, year))
 
     if use_scrapper:
-        query = providers['movie']['searchengine']
-        results.extend(query(title, year))
+        query = providers['movie'].get('searchengine')
+        if query:
+            results.extend(query(title, year))
 
     if use_omdb:
-        query = providers['movie']['omdb']
-        results.extend(query(title, year))
+        query = providers['movie'].get('omdb')
+        if query:
+            results.extend(query(title, year))
 
 
     end_time = time.time()
@@ -64,14 +68,17 @@ def get_id_series(series, year=None, use_tmdbsimple=True, use_tvdb=True, use_omd
 
     # Get series imdbID
     if use_tmdbsimple:
-        query = providers['series']['tmdb']
-        ids.update(query(series, year))
+        query = providers['series'].get('tmdb')
+        if query:
+            ids.update(query(series, year))
     if use_tvdb and not ids.get('series_imdb_id'):
-        query = providers['series']['tvdb']
-        ids.update(query(series, guess_series_tvdb_id=ids.get('series_tvdb_id')))
+        query = providers['series'].get('tvdb')
+        if query:
+            ids.update(query(series, guess_series_tvdb_id=ids.get('series_tvdb_id')))
     if use_omdb and not ids.get('series_imdb_id'):
-        query = providers['series']['omdb']
-        ids.update(query(series, year))
+        query = providers['series'].get('omdb')
+        if query:
+            ids.update(query(series, year))
 
     end_time = time.time()
     delta = end_time - start_time
@@ -88,17 +95,21 @@ def get_id_episode(series, season, episode, year=None, use_tmdbsimple=True, use_
 
     # Get episode imdbID
     if use_tmdbsimple and ids.get('series_tmdb_id'):
-        query = providers['episode']['tmdb']
-        ids.update(query(series, season, episode, guess_episode_tmdb_id=ids['series_tmdb_id']))
+        query = providers['episode'].get('tmdb')
+        if query:
+            ids.update(query(series, season, episode, guess_episode_tmdb_id=ids['series_tmdb_id']))
     if use_scrapper and not ids.get('imdb_id') and ids.get('series_imdb_id'):
-        query = providers['episode']['searchengine']
-        ids.update(query(series, season, episode, guess_episode_imdb_id=ids['series_imdb_id']))
+        query = providers['episode'].get('searchengine')
+        if query:
+            ids.update(query(series, season, episode, guess_episode_imdb_id=ids['series_imdb_id']))
     if use_tvdb and not ids.get('imdb_id'):
-        query = providers['episode']['tvdb']
-        ids.update(query(series, season, episode, guess_episode_tvdb_id=ids.get('series_tvdb_id'), result_tvdb=ids.get('_query_tvdb')))
+        query = providers['episode'].get('tvdb')
+        if query:
+            ids.update(query(series, season, episode, guess_episode_tvdb_id=ids.get('series_tvdb_id'), result_tvdb=ids.get('_query_tvdb')))
     if use_imdb and not ids.get('imdb_id') and ids.get('series_imdb_id'):
-        query = providers['episode']['python-imdb']
-        ids.update(query(series, season, episode, guess_series_imdb_id=ids['series_imdb_id']))
+        query = providers['episode'].get('python-imdb')
+        if query:
+            ids.update(query(series, season, episode, guess_series_imdb_id=ids['series_imdb_id']))
 
     end_time = time.time()
     delta = end_time - start_time
@@ -109,5 +120,8 @@ def get_id_episode(series, season, episode, year=None, use_tmdbsimple=True, use_
     return ids
 
 def get_info(imdb_id):
-    query = providers['info']['omdb']
-    return query(imdb_id)
+    query = providers['info'].get('omdb')
+    if query:
+        return query(imdb_id)
+    else:
+        return dict()

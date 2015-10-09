@@ -42,7 +42,7 @@ def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrap
         logger.info('No perfect match for title "%s" in %.2f s.'%(title, delta))
         return None
     elif len(results) == 1: ## One single match
-        logger.info('One single match for title "{}" found in {:.2f} s: imdbID {}'.format(title, delta, results[0]))
+        logger.info('One single match for title `{}` found in {:.2f} s: imdbID {}'.format(title, delta, results[0]))
         return results[0]
     else:
         best_match = results[0]
@@ -82,7 +82,7 @@ def get_id_series(series, year=None, use_tmdbsimple=True, use_tvdb=True, use_omd
 
     end_time = time.time()
     delta = end_time - start_time
-    logger.info('Ids for series "{}" found in {:.2f} s: {}' %(series, delta, ids))
+    logger.info('Ids for series "{}" found in {:.2f} s: {}'.format(series, delta, ids))
 
     return ids
 
@@ -98,15 +98,19 @@ def get_id_episode(series, season, episode, year=None, use_tmdbsimple=True, use_
         query = providers['episode'].get('tmdb')
         if query:
             ids.update(query(series, season, episode, guess_episode_tmdb_id=ids['series_tmdb_id']))
-    if use_scrapper and not ids.get('imdb_id') and ids.get('series_imdb_id'):
+    if use_scrapper and not ids.get('episode_imdb_id') and ids.get('series_imdb_id'):
         query = providers['episode'].get('searchengine')
         if query:
             ids.update(query(series, season, episode, guess_episode_imdb_id=ids['series_imdb_id']))
-    if use_tvdb and not ids.get('imdb_id'):
+    if use_tvdb and not ids.get('episode_imdb_id'):
         query = providers['episode'].get('tvdb')
         if query:
             ids.update(query(series, season, episode, guess_episode_tvdb_id=ids.get('series_tvdb_id'), result_tvdb=ids.get('_query_tvdb')))
-    if use_imdb and not ids.get('imdb_id') and ids.get('series_imdb_id'):
+    if use_imdb and not ids.get('episode_imdb_id'):
+        query = providers['episode'].get('omdb')
+        if query:
+            ids.update(query(series, season, episode))
+    if use_imdb and not ids.get('episode_imdb_id') and ids.get('series_imdb_id'):
         query = providers['episode'].get('python-imdb')
         if query:
             ids.update(query(series, season, episode, guess_series_imdb_id=ids['series_imdb_id']))

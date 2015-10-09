@@ -24,10 +24,20 @@ def search_series(series, year=None):
     data_series = omdb_query(series, match='string')
     for response in data_series:
         # check if one answer is of type `series`
-        if response.get('Type',None) == 'series':
+        if response.get('Type') == 'series':
             results['series_imdb_id'] = check_imdb(response.get('imdbID', None))
             logger.debug('Found ids for series: {}'.format(results))
             break
+    return results
+
+def search_episode(series, season, episode):
+    results = dict()
+    logger.debug('Use omdbapi.com to get series imdbID of {}'.format(series))
+    response = omdb_query(series, season=season, episode=episode, match='title')
+    if response.get('Type') == 'episode':
+        results['series_imdb_id'] = check_imdb(response.get('seriesID'))
+        results['episode_imdb_id'] = check_imdb(response.get('imdbID'))
+        logger.debug('Found ids for series: {}'.format(results))
     return results
 
 def search_info(imdbid):
@@ -38,7 +48,7 @@ def search_info(imdbid):
         return results
 
 
-def omdb_query(query, year=None, match='string', n_match=None, **kwargs):
+def omdb_query(query, year=None, season=None, episode=None, match='string', n_match=None, **kwargs):
     """Search for information on omdbapi.com with title and (optional) year.
       `match` defines what to look for.
 
@@ -69,6 +79,10 @@ def omdb_query(query, year=None, match='string', n_match=None, **kwargs):
     params = {'r':'json', match_search: query}
     if year:
         params.update({'y':year})
+    if season is not None:  # in case season=0
+        params.update({'Season':season})
+    if episode is not None:
+        params.update({'Episode':episode})
     params.update(kwargs)
 
     url = omdbapi_url + urlencode(params)

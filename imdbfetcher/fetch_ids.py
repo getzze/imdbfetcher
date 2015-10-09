@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 
 
 def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrapper=True):
-    """Get imdbID
-    For Movie:
+    """get_id_movie
+    Return a dictionary containing the matching IDs
         require: `title`, (optional `year`)
-        return: imdbid
+        return: dict() with keys (movie_imdb_id)
     """
     # Time execution
     start_time = time.time()
@@ -60,10 +60,9 @@ def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrap
         return dict()
         
 def get_id_series(series, year=None, use_tmdbsimple=True, use_tvdb=True, use_omdb=True):
-    """Get imdbID
-    For Episode:
-        require: `series`, `season`, `episode`, (optional `year`)
-        return: dict with keys (imdb_id, series_imdb_id, tvdb_id, series_tvdb_id, tmdb_id, series_tmdb_id)
+    """get_id_series
+        require: `series`, (optional `year`)
+        return: dict() with keys (series_imdb_id, series_tvdb_id, series_tmdb_id)
     """
     # Time execution
     start_time = time.time()
@@ -91,6 +90,11 @@ def get_id_series(series, year=None, use_tmdbsimple=True, use_tvdb=True, use_omd
     return ids
 
 def get_id_episode(series, season, episode, year=None, use_tmdbsimple=True, use_scrapper=True, use_tvdb=True, use_omdb=True, use_imdb=True):
+    """get_id_episode
+        require: `series`, `season`, `episode`, (optional `year`)
+        return: dict() with keys (series_imdb_id, series_tvdb_id, series_tmdb_id, episode_imdb_id, episode_tvdb_id, episode_tmdb_id)
+    """
+
     # Collect information on the series
     ids = get_id_series(series, year=year, use_tmdbsimple=use_tmdbsimple, use_tvdb=use_tvdb, use_omdb=use_omdb)
 
@@ -127,7 +131,23 @@ def get_id_episode(series, season, episode, year=None, use_tmdbsimple=True, use_
 
     return ids
 
-def get_info(imdb_id):
+def get_info(ids):
+    """get_info
+    Return a dictionary with information about the movie or episode, given its IMDB ID or a dictionary with the ids.
+        require: `ids`:dict or int or str
+        return: dict()
+    """
+    imdb_id = None
+    if isinstance(ids, dict):
+        if 'imdb_id' in ids:
+            imdb_id = ids['imdb_id']
+        elif 'movie_imdb_id' in ids:
+            imdb_id = ids['movie_imdb_id']
+        elif 'episode_imdb_id' in ids:
+            imdb_id = ids['episode_imdb_id']
+    else:
+        imdb_id = ids
+
     query = providers['info'].get('omdb')
     if query:
         return query(imdb_id)

@@ -3,8 +3,8 @@
 import logging
 import json
 import re
-from . import check_imdb
-from . import urlencode, urlopen
+from .helpers import check_imdb, imdb2number
+from .helpers import urlencode, urlopen
 
 logger = logging.getLogger(__name__)
 
@@ -12,31 +12,31 @@ logger = logging.getLogger(__name__)
 omdbapi_url = "http://www.omdbapi.com/?"
 
 def search_movie(title, year=None):
-	results = omdb_query(title, year=year, match='string')
-	if not isinstance(results, list):
-		return []
-	else:
-		return results
+    results = omdb_query(title, year=year, match='string')
+    if not isinstance(results, list):
+        return []
+    else:
+        return results
 
 def search_series(series, year=None):
-	results = dict()
-	logger.debug('Use omdbapi.com to get series imdbID of {}'.format(series))
-	data_series = omdb_query(series, match='string')
-	for response in data_series:
-		# check if one answer is of type `series`
-		if response.get('Type',None) == 'series':
-			results['series_imdb_id'] = check_imdb(response.get('imdbID', None))
-			logger.debug('Found ids for series: {}'.format(results))
-			break
-	return results
+    results = dict()
+    logger.debug('Use omdbapi.com to get series imdbID of {}'.format(series))
+    data_series = omdb_query(series, match='string')
+    for response in data_series:
+        # check if one answer is of type `series`
+        if response.get('Type',None) == 'series':
+            results['series_imdb_id'] = check_imdb(response.get('imdbID', None))
+            logger.debug('Found ids for series: {}'.format(results))
+            break
+    return results
 
 def search_info(imdbid):
-	results = omdb_query(check_imdb(imdbid), match'imdbid')
-	if not isinstance(results, dict):
-		return dict()
-	else:
-		return results
-	
+    results = omdb_query(imdb2number(imdbid), match='imdbid')
+    if not isinstance(results, dict):
+        return dict()
+    else:
+        return results
+
 
 def omdb_query(query, year=None, match='string', n_match=None, **kwargs):
     """Search for information on omdbapi.com with title and (optional) year.
@@ -53,10 +53,10 @@ def omdb_query(query, year=None, match='string', n_match=None, **kwargs):
     """
     if not query:
         logger.debug('Query is empty: {}'.format(type(query)))
-		if match in ('title', 'imdbid'):
-			return dict()
-		else:
-			return []
+        if match in ('title', 'imdbid'):
+            return dict()
+        else:
+            return []
 
     match_search = 's'
     if match == 'title':
@@ -78,7 +78,7 @@ def omdb_query(query, year=None, match='string', n_match=None, **kwargs):
     except Exception as e:
         logger.exception('Error with url {}'.format(url))
         return dict()
-        
+
     if data.get("Response") == "False":
         logger.debug(data.get("Error", "Unknown error"))
         return dict()

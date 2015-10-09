@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import io
+import re
 import sys
 
 from setuptools import setup, find_packages
@@ -9,7 +10,7 @@ from setuptools import setup, find_packages
 install_requirements = []
 
 # package informations
-with io.open('imbdfetcher/__init__.py', 'r') as f:
+with io.open('imdbfetcher/__init__.py', 'r') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]$', f.read(),
                         re.MULTILINE).group(1)
 

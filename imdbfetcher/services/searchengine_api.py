@@ -6,8 +6,8 @@ import json
 from mechanize import Browser
 from bs4 import BeautifulSoup
 
-from . import check_imdb
-from . import urlencode, urlopen, Request, URLError
+from .helpers import check_imdb
+from .helpers import urlencode, urlopen, Request, URLError
 
 logger = logging.getLogger(__name__)
 
@@ -21,49 +21,49 @@ imdb_url = 'http://akas.imdb.com/title/{}/episodes?season={:d}'
 
 
 def search_episode(series, season, episode, guess_series_imdb_id):
-	results = dict()
-	logger.debug('Use imdb scrapper to get imdbID of {} {:d}x{:d}'.format(series, season, episode))
-	br = Browser()
-	br.set_handle_robots(False)
-	br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.2;\
-						WOW64) AppleWebKit/537.11 (KHTML, like Gecko)\
-						Chrome/23.0.1271.97 Safari/537.11')]
-	r = br.open(imdb_url.format(guess_series_imdb_id, season))
-	soup = BeautifulSoup(r, 'lxml')
-	for a in soup.find_all('a'):
-		href = a.get('href', '')
-		match = re.search(r"/title/tt(?P<id>\d{7})/\?ref_=tt_ep_ep" + '{:d}'.format(episode), href)
-		if match:
-			results['episode_imdb_id'] = check_imdb(match.group('id'))
-			logger.debug('Found ids: {}'.format(results))
-			break
-	return results
+    results = dict()
+    logger.debug('Use imdb scrapper to get imdbID of {} {:d}x{:d}'.format(series, season, episode))
+    br = Browser()
+    br.set_handle_robots(False)
+    br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.2;\
+                        WOW64) AppleWebKit/537.11 (KHTML, like Gecko)\
+                        Chrome/23.0.1271.97 Safari/537.11')]
+    r = br.open(imdb_url.format(guess_series_imdb_id, season))
+    soup = BeautifulSoup(r, 'lxml')
+    for a in soup.find_all('a'):
+        href = a.get('href', '')
+        match = re.search(r"/title/tt(?P<id>\d{7})/\?ref_=tt_ep_ep" + '{:d}'.format(episode), href)
+        if match:
+            results['episode_imdb_id'] = check_imdb(match.group('id'))
+            logger.debug('Found ids: {}'.format(results))
+            break
+    return results
 
 def search_movie(title, year=None):
-	results = []
-	logger.debug('Use scrapper to get imdbID of {} from search engines: {}'.format(title, bangs))
-	for bang in bangs:
-		query = title + (' %d'%(year) if isinstance(year, (int, float)) else '')
-		answer = scrap_query(query, bang=bang)
-		if not answer:
-			logger.debug('Could not make the search on duckduckgo with query {} and bang {}'%(query, bang))
-			continue
-		imdb_id = check_imdb(answer)
-		if imdb_id not in results:
-			results.append(imdb_id)
-			logger.debug('Found possible imdbID for title {}: {}'.format(title, imdb_id))
-		else:
-			logger.debug('ImdbID already matched for title {}: {}'.format(title, imdb_id))
-	return results
+    results = []
+    logger.debug('Use scrapper to get imdbID of {} from search engines: {}'.format(title, bangs))
+    for bang in bangs:
+        query = title + (' %d'%(year) if isinstance(year, (int, float)) else '')
+        answer = scrap_query(query, bang=bang)
+        if not answer:
+            logger.debug('Could not make the search on duckduckgo with query {} and bang {}'%(query, bang))
+            continue
+        imdb_id = check_imdb(answer)
+        if imdb_id not in results:
+            results.append(imdb_id)
+            logger.debug('Found possible imdbID for title {}: {}'.format(title, imdb_id))
+        else:
+            logger.debug('ImdbID already matched for title {}: {}'.format(title, imdb_id))
+    return results
 
 
-Response = namedtuple('Response', 
-		['type', 'api_version',
-		'heading', 'result',
-		'related', 'definition',
-		'abstract', 'redirect',
-		'answer', 'error_code', 
-		'error_msg'])
+Response = namedtuple('Response',
+        ['type', 'api_version',
+        'heading', 'result',
+        'related', 'definition',
+        'abstract', 'redirect',
+        'answer', 'error_code',
+        'error_msg'])
 Result = namedtuple('Result', ['html', 'text', 'url', 'icon'])
 Related = namedtuple('Related', ['html', 'text', 'url', 'icon'])
 Definition = namedtuple('Definition', ['primary','url', 'source'])
@@ -74,14 +74,14 @@ Topic = namedtuple('Topic',['name', 'results'])
 Answer = namedtuple('Answer', ['primary', 'type'])
 
 def scrap_query(query, bang=None):
-    
+
     r = ddg_query('imbd ' + query, bang=bang)
     if 'redirect' in dir(r) and 'primary' in dir(r.redirect):
         url = r.redirect.primary
     else:
         logger.info('Could not find imdb searchpage from DuckDuckGo bang')
         return None
-    
+
     br = Browser()
     br.set_handle_robots(False)
     br.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.2;\
@@ -98,7 +98,7 @@ def scrap_query(query, bang=None):
         if match:
             imdb_id = check_imdb(match.group('number'))
             return imdb_id
-    
+
     return None
 
 def ddg_query(query, bang=None, useragent='python-duckduckgo '+str(__ddg_version__), redirect=False, safesearch=True, html=False, meanings=True, **kwargs):
@@ -170,18 +170,18 @@ def ddg_query(query, bang=None, useragent='python-duckduckgo '+str(__ddg_version
     return process_results(js)
 
 def process_results(js):
-    resp_type = {'A': 'answer', 
+    resp_type = {'A': 'answer',
                  'D': 'disambiguation',
                  'C': 'category',
                  'N': 'name',
-                 'E': 'exclusive', 
+                 'E': 'exclusive',
                  '': 'nothing'}.get(js.get('Type',''), '')
     if resp_type == 'Nothing':
-        return Response(type='nothing', api_version=__ddg_version__, heading=None, 
-                        result=None, related=None, definition=None, 
+        return Response(type='nothing', api_version=__ddg_version__, heading=None,
+                        result=None, related=None, definition=None,
                         abstract=None, redirect=None, answer=None,
                         error_code=0, error_msg=None)
-    
+
     redirect = search_deserialize(js, 'Redirect', Redirect)
     abstract = search_deserialize(js, 'Abstract', Abstract)
     definition = search_deserialize(js, 'Definition', Definition)

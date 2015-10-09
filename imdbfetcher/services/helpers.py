@@ -3,6 +3,22 @@ from __future__ import unicode_literals
 import logging
 import re
 
+try:
+    unicode = unicode
+except NameError:
+    # 'unicode' is undefined, must be Python 3
+    str = str
+    unicode = str
+    bytes = bytes
+    basestring = (str,bytes)
+else:
+    # 'unicode' exists, must be Python 2
+    str = unicode
+    unicode = unicode
+    bytes = str
+    basestring = basestring
+    
+    
 try:  # for python3.*
     from urllib.parse import urlencode
     from urllib.request import urlopen

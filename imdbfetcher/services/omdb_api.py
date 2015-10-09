@@ -13,10 +13,11 @@ omdbapi_url = "http://www.omdbapi.com/?"
 
 def search_movie(title, year=None):
     results = omdb_query(title, year=year, match='string')
-    if not isinstance(results, list):
+    if not isinstance(results, list) or len(results) == 0:
         return []
     else:
-        return results
+        r = check_imdb(results[0].get('imdbID'))
+        return [r]
 
 def search_series(series, year=None):
     results = dict()
@@ -41,7 +42,8 @@ def search_episode(series, season, episode):
     return results
 
 def search_info(imdbid):
-    results = omdb_query(imdb2number(imdbid), match='imdbid')
+    results = omdb_query(imdbid, match='imdbid')
+
     if not isinstance(results, dict):
         return dict()
     else:
@@ -74,6 +76,12 @@ def omdb_query(query, year=None, season=None, episode=None, match='string', n_ma
     if match == 'imdbid':
         match_search = 'i'
         query = check_imdb(query)
+    if not query:
+        logger.debug('Query is empty: {}'.format(type(query)))
+        if match in ('title', 'imdbid'):
+            return dict()
+        else:
+            return []
     query = query.encode("utf-8")
 
     params = {'r':'json', match_search: query}

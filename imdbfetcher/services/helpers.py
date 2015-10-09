@@ -40,9 +40,9 @@ def check_imdb(imdb_id):
             logger.info('ImdbID is badly formed, it should contain 7 digits: "{}"'.format(imdb_id))
             return None
     elif isinstance(imdb_id, str) or isinstance(imdb_id, basestring):
-        match = re.search(r"t{0,2}(?P<number>\d{7})", imdb_id)
+        match = re.search(r"t{0,2}(?P<number>\d*)", imdb_id)
         if match:
-            return 'tt' + match.group('number')
+            return 'tt{:07d}'.format(int(match.group('number')))
         else:
             #raise ValueError('ImdbID is badly formed: "%r"'%(imdb_id))
             logger.info('ImdbID is badly formed: "{}"'.format(imdb_id))
@@ -60,11 +60,15 @@ def imdb2number(imdb_id):
         return imdb_number
 
     try:
-        imdb_number = imdb_id.replace("tt", "")
+        imdb_id = imdb_id.replace("tt", "")
     except AttributeError:
-        try:
-            imdb_number = int(imdb_id)
-        except ValueError:
-            logger.exception('Badly defined IMdb id: {}'.format(imdb_id))
-            return imdb_number
+        # Not a string
+        pass
+
+    try:
+        imdb_number = int(imdb_id)
+    except ValueError:
+        logger.exception('Badly defined IMdb id: {}'.format(imdb_id))
+        return None
+        
     return imdb_number

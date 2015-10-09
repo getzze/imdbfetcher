@@ -40,12 +40,11 @@ def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrap
 
     if len(results) <= 0: ## No match
         logger.info('No perfect match for title "%s" in %.2f s.'%(title, delta))
-        return None
+        best_match = None
     elif len(results) == 1: ## One single match
         logger.info('One single match for title `{}` found in {:.2f} s: imdbID {}'.format(title, delta, results[0]))
-        return results[0]
-    else:
         best_match = results[0]
+    else:
         ## TO DO : compare to best value
         #for match in matches[1:]:
             #response = omdb_search(int2str_imdb(match), match='imdbid')
@@ -53,8 +52,13 @@ def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrap
                 #(title, year) = (response.get('Title',None),response.get('Year',None) )
         #end_time = time.time()
         logger.info('Best match for title "{}" found in {:.2f} s: imdbID {}'.format(title, delta, best_match))
-        return best_match
+        best_match = results[0]
 
+    if best_match:
+        return {'movie_imdb_id':best_match}
+    else:
+        return dict()
+        
 def get_id_series(series, year=None, use_tmdbsimple=True, use_tvdb=True, use_omdb=True):
     """Get imdbID
     For Episode:

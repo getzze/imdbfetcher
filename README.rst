@@ -5,13 +5,20 @@ Fetch IMDB information
 Requirements
 ------------
 
-`imdbfetcher` relies on several python modules to search for information on the video:
+`imdbfetcher` relies on several services to get the best information.
+The basic installation does not require any external module. It relies on the omdb_ API.
+For better matches, use external python modules:
 
-	* [pytvdbapi](https://github.com/fuzzycode/pytvdbapi)
-	* [tmdbsimple](https://github.com/celiao/tmdbsimple)
-	* [python-imdb](https://github.com/nandhp/python-imdb)
-	
-It also uses online services:
+	* tmdbsimple_ (very efficient)
+	* pytvdbapi_
+	* python-imdb_
+	* duckduckgo_ (requires mechanize_ and bs4_ modules)
 
-	* [omdb](http://omdbapi.com/)
-	* [duckduckgo](https://duckduckgo.com/)
+
+.. _omdb: http://omdbapi.com/
+.. _tmdbsimple: https://github.com/celiao/tmdbsimple
+.. _pytvdbapi: https://github.com/fuzzycode/pytvdbapi
+.. _python-imdb: https://github.com/nandhp/python-imdb
+.. _duckduckgo: https://duckduckgo.com/
+.. _mechanize: https://pypi.python.org/pypi/mechanize/
+.. _bs4: https://pypi.python.org/pypi/beautifulsoup4/

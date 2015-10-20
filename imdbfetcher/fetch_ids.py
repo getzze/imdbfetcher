@@ -8,7 +8,7 @@ from .services import providers
 logger = logging.getLogger(__name__)
 
 
-def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrapper=True):
+def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrapper=True, **kwargs):
     """get_id_movie
     Return a dictionary containing the matching IDs
         require: `title`, (optional `year`)
@@ -59,7 +59,7 @@ def get_id_movie(title, year=None, use_tmdbsimple=True, use_omdb=True, use_scrap
     else:
         return dict()
         
-def get_id_series(series, year=None, use_tmdbsimple=True, use_tvdb=True, use_omdb=True):
+def get_id_series(series, year=None, use_tmdbsimple=True, use_tvdb=True, use_omdb=True, **kwargs):
     """get_id_series
         require: `series`, (optional `year`)
         return: dict() with keys (series_imdb_id, series_tvdb_id, series_tmdb_id)
@@ -89,7 +89,7 @@ def get_id_series(series, year=None, use_tmdbsimple=True, use_tvdb=True, use_omd
 
     return ids
 
-def get_id_episode(series, season, episode, year=None, use_tmdbsimple=True, use_scrapper=True, use_tvdb=True, use_omdb=True, use_imdb=True):
+def get_id_episode(series, season, episode, year=None, use_tmdbsimple=True, use_scrapper=True, use_tvdb=True, use_omdb=True, use_imdb=True, **kwargs):
     """get_id_episode
         require: `series`, `season`, `episode`, (optional `year`)
         return: dict() with keys (series_imdb_id, series_tvdb_id, series_tmdb_id, episode_imdb_id, episode_tvdb_id, episode_tmdb_id)
